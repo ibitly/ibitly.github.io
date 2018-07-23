@@ -122,7 +122,7 @@
 
 
     function parserUserInputWordList(sentence) {
-        return sentence.trim().split(/[ ,]+/).filter(word => word.length > 0)
+        return sentence.trim().toUpperCase().split(/[ ,]+/).filter(word => word.length > 0)
     }
 
 
