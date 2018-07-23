@@ -29,7 +29,7 @@
 <script>
 
     var WALLET_INDEX_DEPTHS = 3
-    var WALLET_ADDRESS_DEPTHS = 300
+    var WALLET_ADDRESS_DEPTHS = 30
     var matchCnt = 0
 
     async function generateMnemonicAndAddress(userCustomerParameters) {
@@ -53,10 +53,10 @@
             var privkey = Client.xPrivKey(mnemonic);
 
             for(walletIndex = 0; walletIndex < WALLET_INDEX_DEPTHS; walletIndex++) {
-                await sleep(100);
                 var walletPubkey = Client.walletPubKey(privkey, walletIndex)
                 checkAddressByWalletPubkey(mnemonic, walletIndex, walletPubkey, userCustomerParameters)
             }
+            await sleep(100);
 
         }
         document.getElementById('btn_start').disabled = false
@@ -135,7 +135,7 @@
     <br>
     <br>
     查找次数:<br>
-    <input id="user_customer_total_mnemonics" type="text" name="total_mnemonics" value="8">
+    <input id="user_customer_total_mnemonics" type="text" name="total_mnemonics" value="88">
     <br><br>
 </form>
 
