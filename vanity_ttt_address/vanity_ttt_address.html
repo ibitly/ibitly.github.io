@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<script src="core.js">
+
+</script>
+<head>
+    <meta charset="UTF-8">
+    <style type="text/css">
+</style>
+</head>
+<body>
+
+<h2>TTT地址生成工具</h2>
+
+<script>
+
+    var WALLET_INDEX_DEPTHS = 3
+    var WALLET_ADDRESS_DEPTHS = 300
+    var matchCnt = 0
+
+    async function generateMnemonicAndAddress(userCustomerParameters) {
+
+        matchCnt = 0
+
+        document.getElementById('btn_start').disabled = true
+
+
+        if (userCustomerParameters.matched_words.length == 0) {
+            appendResultList("Empty customer input")
+        }
+        appendResultList("Search following word from address: " + userCustomerParameters.matched_words.join(","))
+        appendResultList("Total mnemonic will be genereated: " + userCustomerParameters.total_mnemonics)
+
+        for(var i = 0; i < userCustomerParameters.total_mnemonics; i++) {
+
+            updateProgress(i+1, userCustomerParameters.total_mnemonics)
+
+            var mnemonic = Client.mnemonic();
+            var privkey = Client.xPrivKey(mnemonic);
+
+            for(walletIndex = 0; walletIndex < WALLET_INDEX_DEPTHS; walletIndex++) {
+                await sleep(100);
+                var walletPubkey = Client.walletPubKey(privkey, walletIndex)
+                checkAddressByWalletPubkey(mnemonic, walletIndex, walletPubkey, userCustomerParameters)
+            }
+
+        }
+        document.getElementById('btn_start').disabled = false
+
+
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function checkAddressByWalletPubkey(mnemonic, walletIndex, walletPubkey, userCustomerParameters) {
+
+        for(var i = 0; i < WALLET_ADDRESS_DEPTHS; i++) {
+            var address = Client.walletAddress(walletPubkey, 0, i)
+            if (isVanityAddress(address, userCustomerParameters)) {
+                showVanityAddress(mnemonic, walletIndex, i, address)
+            }
+        }
+    }
+
+    function isVanityAddress(address, userCustomerParameters) {
+        for(index in userCustomerParameters.matched_words) {
+            var isMatch = address.startsWith(userCustomerParameters.matched_words[index])
+            if (isMatch) {
+                matchCnt++
+                return true
+            }
+        }
+    }
+
+    function showVanityAddress(mnemonic, walletIndex, addressIndex, address) {
+
+        appendResultList("地址：" + address + "<br/>" + "助记词：" + mnemonic + ":::钱包序号：" + walletIndex + ":::地址序号：" + addressIndex)
+
+    }
+
+    function appendResultList(resultItem) {
+
+          var ul = document.getElementById("result_list");
+          var li = document.createElement("li");
+          li.appendChild(document.createTextNode(resultItem));
+          ul.appendChild(li);
+
+    }
+
+    function updateProgress(i, totalMnemonic) {
+        document.getElementById('progress_percent').innerHTML = "找到满足条件的地址：" + matchCnt + "个<br/>"  + "已经查找次数:" + i + "  /总共次数:" + totalMnemonic
+    }
+
+
+
+    function readUserInputParameter() {
+
+        var userCustomerParameters = {}
+        var userInputWords = document.getElementById('user_customer_matched_words').value
+        userCustomerParameters.matched_words = parserUserInputWordList(userInputWords)
+        userCustomerParameters.total_mnemonics = document.getElementById('user_customer_total_mnemonics').value
+
+        return userCustomerParameters
+
+    }
+
+
+    function parserUserInputWordList(sentence) {
+        return sentence.trim().split(/[ ,]+/).filter(word => word.length > 0)
+    }
+
+
+</script>
+
+<form id="user_customer_parameter">
+    指定开头字母／单词: [用逗号或空格分开]
+    <br>
+    <input id="user_customer_matched_words" type="text" name="matched_words" value="TFANS TTT" size="60">
+    <br>
+    <br>
+    查找次数:<br>
+    <input id="user_customer_total_mnemonics" type="text" name="total_mnemonics" value="8">
+    <br><br>
+</form>
+
+<button id="btn_start" type="button"
+        onclick="generateMnemonicAndAddress(readUserInputParameter())">Go
+</button>
+
+<br>
+<p id="progress_percent">进度：</p>
+<br>
+
+<ul id="result_list">
+</ul>
+
+</body>
+
+</html>
