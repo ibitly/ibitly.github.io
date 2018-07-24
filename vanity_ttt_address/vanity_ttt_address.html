@@ -7,6 +7,10 @@
     <meta charset="UTF-8">
     <style type="text/css">
 
+    body {
+        padding: 16px;
+    }
+
     input {
         font-size: 22px;
         color: #E05B41;
@@ -42,6 +46,7 @@
         if (userCustomerParameters.matched_words.length == 0) {
             appendResultList("Empty customer input")
         }
+
         appendResultList("Search following word from address: " + userCustomerParameters.matched_words.join(","))
         appendResultList("Total mnemonic will be genereated: " + userCustomerParameters.total_mnemonics)
 
